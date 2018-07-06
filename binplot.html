@@ -28,11 +28,12 @@ var openFile = function(event) {
   var input = event.target;
   var reader = new FileReader();
   reader.readAsText(input.files[0]);
-  reader
   reader.onload = function(){
   var text1 = reader.result.split('\n').slice(-8761).join('\n');
   data = d3.csvParseRows(text1,function(d,i){
     return {tdb:+d[6]*1.8+32};
+
+    
   });
 console.log(data)
 //  var svg = d3.select("svg"),

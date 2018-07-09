@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <style>
 
-
 .bar {
   fill: steelblue;
 }
@@ -39,8 +38,6 @@ var openFile = function(event){
              width = 950 - margin.left - margin.right,
              height = 500 - margin.top - margin.bottom;
 
-
-
    var count = 10;
    var x = d3.scaleLinear().domain(d3.extent(values)).nice(count);
    var histogram = d3.histogram().domain(x.domain()).thresholds(x.ticks(count));
@@ -63,8 +60,8 @@ var openFile = function(event){
 //            .range([d3.rgb(color).brighter(), d3.rgb(color).darker()]);
 
 var bar = svg.selectAll(".bar")
-    .data(data)
-  .enter().append("g")
+   .data(data)
+   .enter().append("g")
    .attr("class", "bar")
    .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
 

@@ -39,21 +39,26 @@ var openFile = function(event){
              height = 500 - margin.top - margin.bottom;
 
    var count = 10;
-   var x = d3.scaleLinear().domain(d3.extent(values)).nice(count);
+   var x = d3.scaleLinear()
+             .domain(d3.extent(values)).nice(count)
+             .range([margin.left, width - margin.right]);
+
    var histogram = d3.histogram().domain(x.domain()).thresholds(x.ticks(count));
    var data = histogram(values);
    var yMax = d3.max(data, function(d){return d.length});
    var yMin = d3.min(data, function(d){return d.length});
-   var y = d3.scaleLinear().domain([0, yMax]).range([height, 0]);
+   var y = d3.scaleLinear()
+             .domain([0, yMax])
+             .range([height-margin.bottom,margin.top]);
  
-   var xAxis = d3.axisBottom(x)
-   var yAxis = d3.axisLeft(y)
+  var xAxis = d3.axisBottom(x)
+  var yAxis = d3.axisLeft(y)
 
    var svg = d3.select("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              .attr("width", width)
+              .attr("height", height);
+//              .append("g")
+//              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 //var colorScale = d3.scaleLinear()
 //            .domain([yMin, yMax])
@@ -63,27 +68,30 @@ var bar = svg.selectAll(".bar")
    .data(data)
    .enter().append("g")
    .attr("class", "bar")
-   .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+   .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; });
+
+
+//https://bost.ocks.org/mike/bar/3/j
 
 bar.append("rect")
-   .attr("x", 1)
-   .attr("width", (x(data[0].dx) - x(0)) - 1)
-   .attr("height", function(d) { return height - y(d.y); })
+//   .attr("x", 1)
+//   .attr("width", x.bandwidth())
+   .attr("width", (x(data[1].x0) - x(data[0].x0)) - 1)
+   .attr("height", function(d) { return height - y(d.length); })
 //  .attr("fill", function(d) { return colorScale(d.y) });
 
-//bar.append("text")
-//    .attr("dy", ".75em")
-//    .attr("y", -12)
-//    .attr("x", (x(data[0].dx) - x(0)) / 2)
-//    .attr("text-anchor", "middle")
-//    .text(function(d) { return formatCount(d.y); });
+bar.append("text")
+    .attr("dy", ".75em")
+    .attr("y", y(d.length))
+    .attr("x", (x(data[0].x0) - x(0)) / 2)
+    .attr("text-anchor", "middle")
+    .text(function(d) { return d.length; });
 
-svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);    
+//svg.append("g")
+//    .attr("class", "x axis")
+//    .attr("transform", "translate(0," + height + ")")
+//    .call(xAxis);    
 
-//
 //  var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
 //      y = d3.scaleLinear().rangeRound([height, 0]);
 //

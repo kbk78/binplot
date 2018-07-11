@@ -19,6 +19,15 @@
 .axis--x path {
   display: none;
 }
+
+  .histchart text {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: middle;
+  }
+
+.tick { font: 50px sans-serif; }
+ 
 </style>
 <input type='file' id='f1' accept='text/plain' onchange='openFile(event)'><br>
 </body>
@@ -34,26 +43,34 @@ var openFile = function(event){
    var text1 = reader.result.split('\n').slice(-8761).join('\n');
    values = d3.csvParseRows(text1,function(d,i){return +d[6]*1.8+32;});
 
-   margin = {top: 20, right: 20, bottom: 30, left: 40},
+
+
+   margin = {top: 20, right: 80, bottom: 30, left: 40},
              width = 950 - margin.left - margin.right,
              height = 500 - margin.top - margin.bottom;
 
-   var count = 10;
-   var x = d3.scaleLinear()
-             .domain(d3.extent(values)).nice(count)
-             .range([margin.left, width - margin.right]);
+//   var count = 10;
+//   var x = d3.scaleLinear()
+//             .domain(d3.extent(values)).nice(count)
+//             .range([margin.left, width - margin.right]);
 
-   var histogram = d3.histogram().domain(x.domain()).thresholds(x.ticks(count));
-   var data = histogram(values);
+
+bins = [-10,0,10,20,30,40,50,60,70,80,90,100,110]
+
+var x = d3.scaleBand()
+          .rangeRound([0,width])
+          .domain(bins)
+          .padding(0.1);
+
+   var hist = d3.histogram().domain(d3.extent(values)).thresholds(bins);
+
+   var data = hist(values);
    var yMax = d3.max(data, function(d){return d.length});
    var yMin = d3.min(data, function(d){return d.length});
    var y = d3.scaleLinear()
              .domain([0, yMax])
-             .range([height-margin.bottom,margin.top]);
+             .range([height,0]);
  
-  var xAxis = d3.axisBottom(x)
-  var yAxis = d3.axisLeft(y)
-
    var svg = d3.select("svg")
               .attr("width", width)
               .attr("height", height);
@@ -63,6 +80,7 @@ var openFile = function(event){
 //var colorScale = d3.scaleLinear()
 //            .domain([yMin, yMax])
 //            .range([d3.rgb(color).brighter(), d3.rgb(color).darker()]);
+
 
 var bar = svg.selectAll(".bar")
    .data(data)
@@ -75,17 +93,37 @@ var bar = svg.selectAll(".bar")
 
 bar.append("rect")
 //   .attr("x", 1)
-//   .attr("width", x.bandwidth())
-   .attr("width", (x(data[1].x0) - x(data[0].x0)) - 1)
+   .attr("width", x.bandwidth())
+//   .attr("width", (x(data[1].x0) - x(data[0].x0)) - 1)
    .attr("height", function(d) { return height - y(d.length); })
 //  .attr("fill", function(d) { return colorScale(d.y) });
 
-bar.append("text")
-    .attr("dy", ".75em")
-    .attr("y", y(d.length))
-    .attr("x", (x(data[0].x0) - x(0)) / 2)
-    .attr("text-anchor", "middle")
-    .text(function(d) { return d.length; });
+svg.append("g")
+//      .attr("transform", "translate(0," + height-margin.bottom + ")")
+      .attr("transform", "translate(0," + height+")")
+      .call(d3.axisBottom(x));
+
+  // add the y Axis
+svg.append("g")
+      .attr("transform", "translate(50,0)")
+      .call(d3.axisLeft(y));
+
+
+
+
+
+
+//bar.append("text")
+//    .attr("dy", ".75em")
+//    .attr("y", y(d.length))
+//    .attr("x", (x(data[0].x0) - x(data[0].x0)) / 2)
+//    .attr("text-anchor", "middle")
+//    .text(function(d) { return d.length;
+//      console.log(d.length);
+//     });
+//
+
+
 
 //svg.append("g")
 //    .attr("class", "x axis")

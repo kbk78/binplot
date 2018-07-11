@@ -8,25 +8,15 @@
   fill: steelblue;
 }
 
-.histchart {
-  fill: green;
+.bar text{
+  fill: white;
+  font: 8px sans-serif;
 }
+
 
 .bar:hover {
-  fill: brown;
+  fill: green;
 }
-
-.axis--x path {
-  display: none;
-}
-
-  .histchart text {
-  fill: white;
-  font: 10px sans-serif;
-  text-anchor: middle;
-  }
-
-.tick { font: 50px sans-serif; }
  
 </style>
 <input type='file' id='f1' accept='text/plain' onchange='openFile(event)'><br>
@@ -43,12 +33,9 @@ var openFile = function(event){
    var text1 = reader.result.split('\n').slice(-8761).join('\n');
    values = d3.csvParseRows(text1,function(d,i){return +d[6]*1.8+32;});
 
-
-
    margin = {top: 20, right: 80, bottom: 30, left: 40},
              width = 950 - margin.left - margin.right,
              height = 500 - margin.top - margin.bottom;
-
 
 bins = [-10,0,10,20,30,40,50,60,70,80,90,100,110]
 
@@ -57,9 +44,10 @@ var x = d3.scaleBand()
           .domain(bins)
           .padding(0.1);
 
-   var hist = d3.histogram().domain(d3.extent(values)).thresholds(bins);
+   var hist = d3.histogram().domain([-10,110]).thresholds(bins);
 
    var data = hist(values);
+
    var yMax = d3.max(data, function(d){return d.length});
    var yMin = d3.min(data, function(d){return d.length});
    var y = d3.scaleLinear()
@@ -67,53 +55,39 @@ var x = d3.scaleBand()
              .rangeRound([height,0]);
  
    var svg = d3.select("svg")
-              .attr("width", width)
-              .attr("height", height)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+               .attr("width", width + margin.left + margin.right)
+               .attr("height", height + margin.top + margin.bottom)
+               .append("g")
+               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var bar = svg.selectAll(".bar")
+   .data(data)
+   .enter().append("g")
+   .attr("class", "bar")
+   .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; });
 
-//var bar = svg.selectAll(".bar")
-//   .data(data)
-//   .enter().append("g")
-//   .attr("class", "bar")
-//   .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; });
-//
-//
-//bar.append("rect")
-//   .attr("width", x.bandwidth())
-//   .attr("height", function(d) { return height - y(d.length); })
-//
-//
+bar.append("rect")
+   .attr("width", x.bandwidth())
+   .attr("height", function(d) { return height - y(d.length); })
 
 svg.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height+ ")")
-//      .attr("transform", "translate(0," + height+")")
-//      .attr("transform", "translate(0,50)")
+      .attr("transform", "translate(0," +(height).toString()+")")
       .call(d3.axisBottom(x))
-        .attr("x", width - margin.right)
-        .attr("y", -4)
-        .attr("fill", "#000")
-        .attr("font-weight", "bold")
-        .attr("text-anchor", "end");
-//        .text(data.x))
+
 
   // add the y Axis
 svg.append("g")
-//      .attr("transform", "translate(50,0)")
       .call(d3.axisLeft(y));
 
 
-//bar.append("text")
-//    .attr("dy", ".75em")
-//    .attr("y", y(d.length))
-//    .attr("x", (x(data[0].x0) - x(data[0].x0)) / 2)
+bar.append("text")
+    .attr("dy", ".75em")
+    .attr("y", 6)
+//    .attr("x", (x(data[0].x0) - x(data[1].x0)) / 2)
+    .attr("x", (x(data[0].x0)+6))
 //    .attr("text-anchor", "middle")
-//    .text(function(d) { return d.length;
-//      console.log(d.length);
-//     });
-//
+    .text(function(d) { return d.length;
+     });
 
 
 };
